@@ -5,6 +5,7 @@ var settings = {
   persistence: mosca.persistence.Memory
 };
 
+/*START MOSCA*/
 var server = new mosca.Server(settings, function() {
   console.log('Mosca Server is up and running')
 });
