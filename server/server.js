@@ -1,7 +1,15 @@
 var mosca = require('mosca')
 
+var pubsubsettings = {
+  type: 'mongo',
+  url: 'mongodb://localhost:27017/mqtt',
+  pubsubCollection: 'myCollections',
+  mongo: {}
+};
+
 var settings = {
-  port: 1883
+  port: 1883,
+  backend: pubsubsettings
 };
 
 /*START MOSCA*/
