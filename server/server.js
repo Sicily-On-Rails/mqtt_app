@@ -14,12 +14,12 @@ server.published = function(packet,client, cb){
     return cb();
   }
   var newPacket = {
-    topic: 'echo' + packet.topic,
+    topic: 'echo/' + packet.topic,
     payload: packet.payload,
     retain: packet.retain,
     qos: packet.qos
   };
 
-  console.log('newPacket',newPacket);
+  console.log('newPacket', newPacket);
   server.publish(newPacket, cb);
 }
