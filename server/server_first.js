@@ -8,8 +8,7 @@ var pubsubsettings = {
 };
 
 var settings = {
-  port: 1883,
-  backend: pubsubsettings
+  port: 1883
 };
 
 /*START MOSCA*/
