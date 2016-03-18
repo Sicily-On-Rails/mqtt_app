@@ -1,15 +1,20 @@
-/*mqtt*/
+/*eseguendo questo file invio un messaggio sul topic MIO_TOPIC sul quale è in ascolto il mio server
+sto quindi simulando l'invio di un valore del sensore da Arduino.*/
 
 var mqtt = require('mqtt')
 
 /*connect to the server*/
-client = mqtt.createClient(1883, 'localhost');
+var client  = mqtt.connect({ host: 'localhost', port: 1883 });
 
 /*subscribe to a topic named 'presence'*/
-client.subscribe('presence');
+//client.subscribe('presence'); 		//non serve che il publisher si sottoscriva al topic
 
-console.log('Client publishing..');
-/*we publish a message to 'presence'*/
-client.publish('presence','Client 1 is alive.. Test Ping!' + Date());
+client.on('connect', function() { // When connected
 
-client.end();
+  // publish a message sul topic: "MIO_TOPIC"
+  var message={'type':'temperature', 'value': '16'};	//scelgo JSON per il formato di invio dei dati MQTT 
+  client.publish('MIO_TOPIC', JSON.stringify(message), function() {
+    console.log("Message is published");
+    client.end(); // Close the connection when published
+  });
+});
