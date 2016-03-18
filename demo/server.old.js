@@ -3,30 +3,9 @@ var mqtt = require('mqtt')
 var express = require('express');
 var app = express();
 var mosca = require ('mosca')
-var MongoClient = require('mongodb').MongoClient;
 
 var lastSensorValue;	//variabile di appoggio per la visualizzazione dei valori lato frontend
 
-// **************** MongoDB ****************
-var mongodbsettings = {
-  type: 'mongo',
-  url: 'mongodb://localhost:27017/mqtt',
-  pubsubCollection: 'sensor',
-  mongo: {}
-};
-/*
-var insertvalue = function(db, callback) {
-   db.collection('sensor').insertOne(
-     {
-           'name': 'dario'
-     },
-    function(err, result) {
-    assert.equal(err, null);
-    console.log("Inserted a document into the sensor collection.");
-    callback();
-  });
-};
-*/
 
 // **************** Metodi richiamabili dal browser ****************
 
@@ -59,7 +38,6 @@ app.get('/getLastValue', function (req, res) {
 
 	var settings = {
 	  port: 1883,
-    backend: mongodbsettings,
 	  persistence: mosca.persistence.Memory
 	};
 
@@ -106,14 +84,6 @@ client.on("message", function(topic, payload,packet) {
 		lastSensorValue=sensorValue;		//memorizzo per test in una variabile il valore da tornare con il metodo GET '/getLastValue'
 		console.log("Sensor Type: "+sensorType);
 		console.log("Sensor value: "+sensorValue);
-
-    MongoClient.connect(mongodbsettings.url, function(err, db) {
-      var collection = db.collection('sensor');
-      var a = sensorValue;
-      var value = {'value': a,'topic':'prova' };
-      collection.insert(value, {w:1}, function(err, result) {});
-    });
-
       });
 
 console.log('Client started...');

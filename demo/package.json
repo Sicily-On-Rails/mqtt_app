@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/Sicily-On-Rails/mqtt_app#readme",
   "dependencies": {
+    "mongodb": "^2.1.7",
     "mqtt": "^1.7.3"
   }
 }
