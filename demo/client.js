@@ -12,7 +12,7 @@ var client  = mqtt.connect({ host: 'localhost', port: 1883 });
 client.on('connect', function() { // When connected
 
   // publish a message sul topic: "MIO_TOPIC"
-  var message={'type':'temperature', 'value': '16'};	//scelgo JSON per il formato di invio dei dati MQTT 
+  var message={'type':'temperature', 'value': '12'};	//scelgo JSON per il formato di invio dei dati MQTT 
   client.publish('MIO_TOPIC', JSON.stringify(message), function() {
     console.log("Message is published");
     client.end(); // Close the connection when published

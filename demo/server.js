@@ -1,4 +1,6 @@
-/* Server web (realizzato con express) che integra il broker MQTT ed il subscriber MQTT */
+/* Server web (realizzato con express) che integra il broker MQTT ed il subscriber MQTT 
+ricordarsi di avviare il database mongodb con il comando 'mongod' prima di avviare server
+*/
 var mqtt = require('mqtt')
 var express = require('express');
 var app = express();
@@ -8,6 +10,13 @@ var MongoClient = require('mongodb').MongoClient;
 var lastSensorValue;	//variabile di appoggio per la visualizzazione dei valori lato frontend
 
 // **************** MongoDB ****************
+var mongodbMosca = {
+  type: 'mongo',
+  url: 'mongodb://localhost:27017/mqtt',
+  pubsubCollection: 'moscaLog',
+  mongo: {}
+};
+
 var mongodbsettings = {
   type: 'mongo',
   url: 'mongodb://localhost:27017/mqtt',
@@ -59,7 +68,7 @@ app.get('/getLastValue', function (req, res) {
 
 	var settings = {
 	  port: 1883,
-    backend: mongodbsettings,
+      backend: mongodbMosca,
 	  persistence: mosca.persistence.Memory
 	};
 
@@ -97,21 +106,33 @@ client.on('connect', function() { // When connected
 });
 
 client.on("message", function(topic, payload,packet) {
-        console.log("PACCHETTO RICEVUTO: "+packet.payload.toString());
+	console.log("PACCHETTO RICEVUTO: "+packet.payload.toString());
 
-		//faccio il parse JSON del messaggio ricevuto
-		var json = JSON.parse(packet.payload);
-		var sensorType= json.type;
-		var sensorValue= json.value;		//valore da memorizzare in un array o database per la successiva visualizzazione su un grafico lato client web
-		lastSensorValue=sensorValue;		//memorizzo per test in una variabile il valore da tornare con il metodo GET '/getLastValue'
-		console.log("Sensor Type: "+sensorType);
-		console.log("Sensor value: "+sensorValue);
+	//faccio il parse JSON del messaggio ricevuto
+	var json = JSON.parse(packet.payload);
+	var sensorType= json.type;
+	var sensorValue= json.value;		//valore da memorizzare in un array o database per la successiva visualizzazione su un grafico lato client web
+	lastSensorValue=sensorValue;		//memorizzo per test in una variabile il valore da tornare con il metodo GET '/getLastValue'
+	console.log("\tSensor Type: "+sensorType);
+	console.log("\tSensor value: "+sensorValue);
 
     MongoClient.connect(mongodbsettings.url, function(err, db) {
-      var collection = db.collection('sensor');
-      var a = sensorValue;
-      var value = {'value': a,'topic':'prova' };
-      collection.insert(value, {w:1}, function(err, result) {});
+		if(err) {
+			console.log("Errore nella connessione al database: "+err.message);
+		}
+		else {
+			var sensorCollection = db.collection('sensor');
+			var document = {'value': sensorValue};	//per convenzione chiamo l'oggetto che inserisco nel database 'document'
+			sensorCollection.insert(document, {w:1}, function(err, result) {
+				if (err){
+					console.warn("Errore nell'inserimento nel database: "+err.message);  // returns error if no matching object found
+				}else{
+					console.log("Inserimento nel db avvenuto con successo: "+JSON.stringify(result));
+				}
+				db.close();
+			 });
+		
+		}
     });
 
       });
