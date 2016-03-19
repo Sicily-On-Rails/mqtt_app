@@ -1,4 +1,4 @@
-/* Server web (realizzato con express) che integra il broker MQTT ed il subscriber MQTT 
+/* Server web (realizzato con express) che integra il broker MQTT ed il subscriber MQTT
 ricordarsi di avviare il database mongodb con il comando 'mongod' prima di avviare server
 */
 var mqtt = require('mqtt')
@@ -7,7 +7,8 @@ var app = express();
 var mosca = require ('mosca')
 var MongoClient = require('mongodb').MongoClient;
 
-var lastSensorValue;	//variabile di appoggio per la visualizzazione dei valori lato frontend
+//var lastSensorValue;	//variabile di appoggio per la visualizzazione dei valori lato frontend
+
 
 // **************** MongoDB ****************
 var mongodbMosca = {
@@ -23,19 +24,7 @@ var mongodbsettings = {
   pubsubCollection: 'sensor',
   mongo: {}
 };
-/*
-var insertvalue = function(db, callback) {
-   db.collection('sensor').insertOne(
-     {
-           'name': 'dario'
-     },
-    function(err, result) {
-    assert.equal(err, null);
-    console.log("Inserted a document into the sensor collection.");
-    callback();
-  });
-};
-*/
+
 
 // **************** Metodi richiamabili dal browser ****************
 
@@ -54,9 +43,58 @@ app.get('/test', function (req, res) {
 });
 
 //metodo per avere l'ultimo valore ricevuto richiamabile da browser: http://localhost:3000/getLastValue
-//TODO: implementare la lettura di un array con gli ultimi N valori o lettura da un database
 app.get('/getLastValue', function (req, res) {
-  res.send(lastSensorValue);
+  MongoClient.connect(mongodbsettings.url, function(err, db) {
+  if(err)
+    {
+      console.log("Errore connessione al database: "+err.message);
+    }
+  else
+    {
+      //FINALMENTE!! CONNESSO
+      console.log('Connessione stabilita to', mongodbsettings.url);
+
+          var collection = db.collection('sensor');
+          collection.find().sort({"_id":-1}).limit(1).toArray(function(err, lastSensorValue){
+            if (err)
+            {
+              console.log("Errore"+err.message);
+            } else
+            {
+                console.log(lastSensorValue);
+                res.send(lastSensorValue);
+            }
+        });
+    }
+  });
+});
+
+
+
+//metodo per avere tutti i valori ricevuto dal database richiamabile da browser: http://localhost:3000/getLastValue
+app.get('/getAllValue', function (req, res){
+
+  MongoClient.connect(mongodbsettings.url, function(err, db) {
+  if(err)
+    {
+      console.log("Errore connessione al database: "+err.message);
+    }
+  else
+    {
+      //FINALMENTE!! CONNESSO
+      console.log('Connessione stabilita to', mongodbsettings.url);
+
+          var collection = db.collection('sensor');
+          collection.find(/*{value:'12'}*/).toArray(function(err, allSensorValue) {
+            if (err) {
+              console.log("Errore"+err.message);
+            } else {allSensorValue
+                console.log(allSensorValue);
+                res.send(allSensorValue);
+            }
+          });
+    }
+  });
 });
 
 // **************** Fine metodi richiamabili dal browser ****************
@@ -68,7 +106,7 @@ app.get('/getLastValue', function (req, res) {
 
 	var settings = {
 	  port: 1883,
-      backend: mongodbMosca,
+    backend: mongodbMosca,
 	  persistence: mosca.persistence.Memory
 	};
 
@@ -93,8 +131,6 @@ app.get('/getLastValue', function (req, res) {
 	  console.log('Mosca server is up and running');
 }
 // **************** MOSCA CONFIGURATION - FINE CODICE BROKER MQTT ****************
-
-
 
 /*connect to the server*/
 client = mqtt.createClient(1883, 'localhost');
@@ -131,10 +167,10 @@ client.on("message", function(topic, payload,packet) {
 				}
 				db.close();
 			 });
-		
-		}
-    });
 
-      });
+		}
+  });
+});
+
 
 console.log('Client started...');
