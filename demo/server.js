@@ -6,6 +6,8 @@ var express = require('express');
 var app = express();
 var mosca = require ('mosca')
 var MongoClient = require('mongodb').MongoClient;
+var path = require('path');
+
 
 //var lastSensorValue;	//variabile di appoggio per la visualizzazione dei valori lato frontend
 
@@ -31,6 +33,40 @@ var mongodbsettings = {
 app.get('/', function (req, res) {
   res.send('Hello World!');
 });
+
+app.get('/index.html', function(req, res) {
+    res.sendFile(path.join(__dirname + '/index.html'));
+});
+/* FUNZIONE PIU' PULITA CHE MI RITORNA SOLO VALUE SENZA _ID*/
+app.get("/scores", function(req, res){
+  MongoClient.connect(mongodbsettings.url, function(err, db) {
+  if(err)
+    {
+      console.log("Errore connessione al database: "+err.message);
+    }
+  else
+    {
+      //FINALMENTE!! CONNESSO
+      console.log('Connessione stabilita to', mongodbsettings.url);
+      var collection = db.collection('sensor');
+      //Query Mongodb and iterate through the results
+      collection.find({}).toArray(
+        function(err, docs){
+          var result = [];
+          for(index in docs){
+            var doc = docs[index];
+            var resultObject = {};
+            resultObject.label = doc.type;
+            resultObject.value = doc.value;
+            result.push(resultObject);
+          }
+          res.json(result);
+        }
+      );
+    }
+  });
+});
+
 
 http://localhost:3000/
 app.listen(3000, function () {
