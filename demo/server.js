@@ -1,5 +1,7 @@
 /* Server web (realizzato con express) che integra il broker MQTT ed il subscriber MQTT
 ricordarsi di avviare il database mongodb con il comando 'mongod' prima di avviare server
+
+andare su http://localhost:3000/grafico per vedere il grafico.
 */
 var mqtt = require('mqtt')
 var express = require('express');
@@ -65,6 +67,11 @@ app.get("/scores", function(req, res){
       );
     }
   });
+});
+
+app.get('/grafico', function (req, res)
+{
+	 res.sendFile(path.join(__dirname+'/grafico.html'));		//con il metodo sendFile posso tornare al client un file html (la pagina grafico.html che hai fatto)
 });
 
 
