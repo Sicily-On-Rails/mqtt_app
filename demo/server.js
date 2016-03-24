@@ -9,6 +9,7 @@ var app = express();
 var mosca = require ('mosca')
 var MongoClient = require('mongodb').MongoClient;
 var path = require('path');
+var fs= require('fs');
 
 
 //var lastSensorValue;	//variabile di appoggio per la visualizzazione dei valori lato frontend
@@ -58,11 +59,21 @@ app.get("/scores", function(req, res){
           for(index in docs){
             var doc = docs[index];
             var resultObject = {};
-            resultObject.label = doc.type;
+            resultObject.type = doc.type; //cambiato da .label in .type il resultObject
             resultObject.value = doc.value;
             result.push(resultObject);
           }
           res.json(result);
+          /*INIZIO FUNZIONE CHE SCRIVE I DATI JSON SUL FILE*/
+          var outputFilename = path.join(__dirname, 'data.json');
+          fs.writeFile(outputFilename, JSON.stringify(result, null, 4), function(err) {
+              if(err) {
+                console.log(err);
+              } else {
+                console.log("JSON saved to " + outputFilename);
+              }
+          });
+          /*FINE FUNZIONE CHE SCRIVE I DATI JSON SUL FILE*/
         }
       );
     }
@@ -201,7 +212,7 @@ client.on("message", function(topic, payload,packet) {
 		}
 		else {
 			var sensorCollection = db.collection('sensor');
-			var document = {'value': sensorValue};	//per convenzione chiamo l'oggetto che inserisco nel database 'document'
+			var document = {'type':sensorType,'value': sensorValue};	//per convenzione chiamo l'oggetto che inserisco nel database 'document'
 			sensorCollection.insert(document, {w:1}, function(err, result) {
 				if (err){
 					console.warn("Errore nell'inserimento nel database: "+err.message);  // returns error if no matching object found
