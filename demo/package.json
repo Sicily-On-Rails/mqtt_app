@@ -1,0 +1,23 @@
+{
+  "name": "client1",
+  "version": "1.0.0",
+  "description": "client for mqtt_app",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sicily-On-Rails/mqtt_app.git"
+  },
+  "author": "dario platania",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Sicily-On-Rails/mqtt_app/issues"
+  },
+  "homepage": "https://github.com/Sicily-On-Rails/mqtt_app#readme",
+  "dependencies": {
+    "mongodb": "^2.1.7",
+    "mqtt": "^1.7.3"
+  }
+}
