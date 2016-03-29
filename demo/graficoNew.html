@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<!-- saved from url=(0050)http://getbootstrap.com/examples/starter-template/ -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="http://getbootstrap.com/favicon.ico">
+	
+
+	<link href="./js/jquery.jqplot.min.css" rel="stylesheet" type="text/css" />
+    <title>Starter Template for Bootstrap</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="./Starter Template for Bootstrap_files/bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="./Starter Template for Bootstrap_files/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="./Starter Template for Bootstrap_files/starter-template.css" rel="stylesheet">
+
+    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+    <script src="./Starter Template for Bootstrap_files/ie-emulation-modes-warning.js"></script>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+	
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="./Starter Template for Bootstrap_files/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
+    <script src="./Starter Template for Bootstrap_files/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="./Starter Template for Bootstrap_files/ie10-viewport-bug-workaround.js"></script>
+		<script type="text/javascript" src="./js/jquery-1.9.1.min.js"></script>
+	<script type="text/javascript" src="./js/jquery.jqplot.min.js"></script>
+	<script type="text/javascript" src="./js/jqplot.dateAxisRenderer.min.js"></script>
+	
+	
+
+<script type="text/javascript">
+
+
+$(document).ready(function(){
+   var t = 2000;  //tempo di aggiornamento
+   var x = (new Date()).getTime(); // tempo corrente
+   var n = 20;  //dimensione buffer
+   data = [];   //buffer
+
+   var datiIniziali=[];
+   var plot1 ;
+   //inizializzo l'asse delle ascisse con i valori del time corrente
+
+   //datiIniziali=getAllData();											//immaginiamo che getAllData aveva alla fine un "return datiDaTornare" classico.
+   //console.log("Dati iniziali: "+JSON.stringify(datiIniziali));		//ritornerebbe UNDEFINED!!
+
+											//volendo mettere questi valori nelle ordinate (il valore 0 che vedi
+											//come secondo valore nella variabile "value". NON avrebbe funzionato in quanto quando chiami la funzione essendo asincrona
+											//il codice continua ad andare avanti con la variabile datiIniziali ancora vuota.. si deve quindi usare una funzione che resti
+											//in "attesa" della risposta, ossia una CALLBACK, per questo la funzione getAllData ha il parametro callback e quando la chiamo
+											//gli passo una funzione come parametro.. è un concetto un po strano se non lo hai mai sentito, quindi in caso ti consiglio
+											//di cercare un po di documentazione sul web..
+
+
+
+   getAllData(function(val){
+		console.log("\nDATI TORNATI!! "+val);		//dalla console puoi vedere che questo log lo stampa alla fine proprio perchè la funzione è eseguita in modo asincrono
+		//qui metto il codice di sopra che riempie le ascisse e le ordinate con i primi valori:
+		//usare la funzione .length per sostituire al posto di n nel ciclo for il numero di valori tornati.
+		var nval=val.length;
+		//nval=20;
+		for(i=0; i<nval; i++){
+			var value=[x - (nval-1-i)*t,val[i]];		//devo sostituire il valore 0 con i valori presi dalla funzione getAllData().. c'è un problema:
+												//la chiamata XMLHttpRequest, diciamo pure AJAX, è appunto asincrona, quindi quando la chi
+			data.push(value);
+			console.log("pusho: "+value)
+			 if(data.length > n-1){
+				 data.shift();
+			  }
+		}
+
+		 var options = {
+			  axes: {
+				 xaxis: {
+					numberTicks: 4,
+					renderer:$.jqplot.DateAxisRenderer,
+					tickOptions:{formatString:'%H:%M:%S'},
+					min : data[0][0],
+					max: data[data.length-1][0]
+				 },
+				 yaxis: {
+					min:14,
+					max: 32,
+					numberTicks: 6,
+					tickOptions:{formatString:'%.1f'}
+				 }
+			  },
+			  seriesDefaults: {
+				 rendererOptions: { smooth: true}
+			  }
+		   };
+
+
+
+		//ricordarsi di richiamare la funzione che plotta il grafico sempre qui dentro!!
+		plot1 = $.jqplot ('myChart', [data],options); 	//ricordarsi che questa funzione in questo punto NON va bene per avere i valori iniziali corretti e non tutti zero.
+
+
+		setInterval(function(){getLastData(function(val){
+			doUpdate(val);}) }, t);
+		});
+
+
+//   	var plot1 = $.jqplot ('myChart', [data],options); 	//ricordarsi che questa funzione in questo punto NON va bene per avere i valori iniziali corretti e non tutti zero.
+ /*
+	$('button').click( function(){
+		/*getLastData(function(val){
+			doUpdate(val);
+		});	//fine commento
+
+
+	  $(this).hide();
+	   var asd= setInterval(getLastData(function(val){
+			doUpdate(val);}), t);
+   });*/
+
+   function doUpdate(val) {
+      if(data.length > n-1){
+         data.shift();
+      }
+	  //chiamare qua la funzione getLastData() e sostituire la var y con il valore tornato.
+      //var y = Math.random();   //qui andrebbero i valori di temperatura
+	  var y=val;
+      var x = (new Date()).getTime();
+      data.push([x,y]);    // carico il nuovo elemento
+
+	 		 var options = {
+			  axes: {
+				 xaxis: {
+					numberTicks: 4,
+					renderer:$.jqplot.DateAxisRenderer,
+					tickOptions:{formatString:'%H:%M:%S'},
+					min : data[0][0],
+					max: data[data.length-1][0]
+				 },
+				 yaxis: {
+					min:14,
+					max: 31,
+					numberTicks: 6,
+					tickOptions:{formatString:'%.1f'}
+				 }
+			  },
+			  seriesDefaults: {
+				 rendererOptions: { smooth: true}
+			  }
+		   };
+
+      if (plot1) {
+		plot1.destroy();
+      }
+      plot1.series[0].data = data;
+      options.axes.xaxis.min = data[0][0];
+      options.axes.xaxis.max = data[data.length-1][0];
+      plot1 = $.jqplot ('myChart', [data],options);
+
+
+   }
+
+
+function getAllData(callback) {
+  var datiDaTornare=[];
+  var the_object ;
+  var xhr = new XMLHttpRequest() ;
+  //188.226.224.201
+  var url = "http://188.226.224.201:3000/getAllValue" ;   //non riesco a prendere i valori -> avevi scritto male l'url (getallvalue), ma cmq questa pagina html
+													//doveva essere inserita sul Server in quanto è sempre la che risiede tutto il sito; quando si fa una get di una pagina web
+													//siamo lato client, ma il codice da caricare viene cmq inviato dal server (vedi piccola modifica sul file server.js)
+  xhr.open("GET", url, true) ;
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState == 4) {
+		console.log("State ready!") ;
+		if (xhr.status == 200) {
+		  console.log("Dati ricevuti: "+xhr.responseText);		//in xhr.responseText hai la risposta del server in formato stringa
+		  the_object = JSON.parse(xhr.responseText) ;			//visto che si tratta di un oggetto json e lo voglio usare come tale chiamo la funzione
+																//JSON.parse() che mi trasforma la stringa ricevuta in oggetto JSON; in questo modo
+																//posso navigare l'oggetto usando la notazione puntata.
+																//l'oggetto ricevuto inizia con le parentesi quadre, si tratta quindi di un array.
+																//al suo interno vi sono elementi tra parentesi graffe, si tratta quindi di un array di oggetti
+
+		  for(var element in the_object){						//per scorrere un array JSON conviene usare un ciclo FOR in questo modo
+			var el=the_object[element].value;					//con la notazione puntata prendo l'elemento ".value" (il mio valore da graficare :) )
+			console.log(el) ;									//per essere sicuro di prendere il valore che mi serve stampo sulla console (tasto destro su
+																//google chrome->Ispezione->tab Console)
+			datiDaTornare.push(el);
+		  }
+		  //msg  = the_object.items[0].value + "-" ;
+		  //msg += the_object.items[0].order ;
+		  callback(datiDaTornare);
+		  //return datiDaTornare;	//funzione lasciata solo per scopo didattico. NON decommentare
+		} else {
+		  console.log("Si e' verificato un problema con l'URL.");
+		}
+    }
+  } ;
+  console.log("Sending request") ;
+  xhr.send(null) ;
+}
+
+
+
+function getLastData(callback) {
+  var datoDaTornare;
+  var the_object ;
+  var xhr = new XMLHttpRequest() ;
+  var url = "http://188.226.224.201:3000/getLastValue" ;   //non riesco a prendere i valori -> avevi scritto male l'url (getallvalue), ma cmq questa pagina html 
+													//doveva essere inserita sul Server in quanto è sempre la che risiede tutto il sito; quando si fa una get di una pagina web
+													//siamo lato client, ma il codice da caricare viene cmq inviato dal server (vedi piccola modifica sul file server.js)
+  xhr.open("GET", url, true) ;
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState == 4) {
+		console.log("State ready!") ;
+		if (xhr.status == 200) {
+		  console.log("Dati ricevuti: "+xhr.responseText);		//in xhr.responseText hai la risposta del server in formato stringa
+		  the_object = JSON.parse(xhr.responseText) ;			//visto che si tratta di un oggetto json e lo voglio usare come tale chiamo la funzione
+																//JSON.parse() che mi trasforma la stringa ricevuta in oggetto JSON; in questo modo
+																//posso navigare l'oggetto usando la notazione puntata.
+																//l'oggetto ricevuto inizia con le parentesi quadre, si tratta quindi di un array.
+																//al suo interno vi sono elementi tra parentesi graffe, si tratta quindi di un array di oggetti
+
+		var el=the_object[0].value;
+		console.log("Ultimo valore: "+el);
+		 /* for(var element in the_object){						//per scorrere un array JSON conviene usare un ciclo FOR in questo modo
+			var el=the_object[element].value;					//con la notazione puntata prendo l'elemento ".value" (il mio valore da graficare :) )
+			console.log(el) ;									//per essere sicuro di prendere il valore che mi serve stampo sulla console (tasto destro su
+																//google chrome->Ispezione->tab Console)
+			datoDaTornare.push(el);
+		  }*/
+		  //msg  = the_object.items[0].value + "-" ;
+		  //msg += the_object.items[0].order ;
+		  callback(el);
+		  //return datiDaTornare;	//funzione lasciata solo per scopo didattico. NON decommentare
+		} else {
+		  console.log("Si e' verificato un problema con l'URL.");
+		}
+    }
+  } ;
+  console.log("Sending request") ;
+  xhr.send(null) ;
+}
+
+//TODO: fare funzione analoga alla getAllData ma che richiama il metodo per avere l'ultimo valore (es. getLastData.. anche se io le chiamarei getAllValue e getLastValue come i nomi dei metodi)
+//questa funzione dovrà essere richiamata dentro il metodo doUpdate in modo che torni il nuovo valore da graficare
+
+});
+
+</script>
+	
+	
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand">Home</a>
+        </div>
+        
+      </div>
+    </nav>
+
+    <div class="container">
+
+      <div class="starter-template">
+        <h1>Sicily on Rails Conference
+        <p class="lead">Catania - 30 marzo 2016</p>
+		<h2>Demo Internet of Things
+		<div id="myChart" class="lead" ></div>
+      </div>
+	
+    </div><!-- /.container -->
+
+
+	
+	
+	
+  
+
+</body></html>

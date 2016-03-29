@@ -75,6 +75,11 @@ app.get('/grafico', function (req, res){
 	 res.sendFile(path.join(__dirname+'/grafico.html'));		//con il metodo sendFile posso tornare al client un file html (la pagina grafico.html che hai fatto)
 });
 
+//nuova interfaccia con bootstrap
+app.get('/graficoNew', function (req, res){
+	 res.sendFile(path.join(__dirname+'/graficoNew.html'));		
+});
+
 
 http://localhost:3000/
 app.listen(3000, function () {
