@@ -38,9 +38,7 @@ app.get('/', function (req, res) {
   res.send('Hello World!');
 });
 
-app.get('/index.html', function(req, res) {
-    res.sendFile(path.join(__dirname + '/index.html'));
-});
+
 /* FUNZIONE PIU' PULITA CHE MI RITORNA SOLO VALUE SENZA _ID*/
 app.get("/scores", function(req, res){
   MongoClient.connect(mongodbsettings.url, function(err, db) {
@@ -77,7 +75,7 @@ app.get('/grafico', function (req, res){
 
 //nuova interfaccia con bootstrap
 app.get('/graficoOld', function (req, res){
-	 res.sendFile(path.join(__dirname+'/grafico.html'));		
+	 res.sendFile(path.join(__dirname+'/grafico.html'));
 });
 
 
